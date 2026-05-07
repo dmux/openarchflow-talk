@@ -1,0 +1,1132 @@
+<!doctype html>
+
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+
+    <title>OpenArchFlow — IA para Arquitetura AWS &amp; Terraform</title>
+
+    <!-- Reveal.js core + tema base (sobrescrito abaixo) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reset.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/black.css" id="theme">
+
+    <!-- Highlight.js para blocos de código -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/monokai.css">
+
+    <!-- Fontes distintas: JetBrains Mono (mono/tech) + Space Grotesk evitada -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        /* =========================================================
+           OpenArchFlow Talk — Custom Theme
+           Paleta: roxo Terraform (#7B42BC) + laranja AWS (#FF9900)
+           + ciano elétrico (#00E5FF) sobre fundo escuro profundo
+           ========================================================= */
+        :root {
+            --oaf-bg-deep:   #0a0a16;
+            --oaf-bg-soft:   #12122a;
+            --oaf-purple:    #7B42BC;
+            --oaf-purple-2:  #9D5CE0;
+            --oaf-aws:       #FF9900;
+            --oaf-cyan:      #00E5FF;
+            --oaf-pink:      #FF3D7F;
+            --oaf-green:     #2EE6A6;
+            --oaf-text:      #EDEDFB;
+            --oaf-muted:     #8a8aad;
+            --font-display:  'Sora', system-ui, sans-serif;
+            --font-mono:     'JetBrains Mono', ui-monospace, monospace;
+        }
+
+        html, body { background: var(--oaf-bg-deep); }
+
+        /* Fundo com grid sutil + glow radial (atmosfera tech) */
+        .reveal-viewport {
+            background:
+                radial-gradient(1200px 800px at 15% 10%, rgba(123,66,188,0.20), transparent 60%),
+                radial-gradient(1000px 700px at 85% 90%, rgba(0,229,255,0.12), transparent 60%),
+                linear-gradient(180deg, #0a0a16 0%, #0d0d1f 100%);
+        }
+
+        .reveal-viewport::before {
+            content: "";
+            position: fixed; inset: 0;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+            background-size: 48px 48px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .reveal {
+            font-family: var(--font-display);
+            color: var(--oaf-text);
+            font-weight: 400;
+            letter-spacing: -0.005em;
+        }
+
+        .reveal .slides { z-index: 1; }
+
+        .reveal h1, .reveal h2, .reveal h3, .reveal h4 {
+            font-family: var(--font-display);
+            font-weight: 800;
+            text-transform: none;
+            letter-spacing: -0.025em;
+            color: var(--oaf-text);
+            line-height: 1.05;
+            text-shadow: none;
+        }
+
+        .reveal h1 { font-size: 1.6em; }
+        .reveal h2 { font-size: 1.15em; }
+        .reveal h3 { font-size: 0.95em; color: var(--oaf-cyan); }
+        .reveal h4 { font-size: 0.85em; color: var(--oaf-aws); font-weight: 600; }
+
+        .reveal p, .reveal li { font-size: 0.72em; line-height: 1.5; }
+        .reveal ul, .reveal ol { display: block; margin-left: 1.2em; }
+        .reveal li { margin: 0.3em 0; }
+        .reveal li::marker { color: var(--oaf-purple-2); }
+
+        .reveal a { color: var(--oaf-cyan); text-decoration: none; border-bottom: 1px dashed rgba(0,229,255,0.4); }
+        .reveal a:hover { color: var(--oaf-aws); border-color: var(--oaf-aws); }
+
+        .reveal strong { color: var(--oaf-aws); font-weight: 700; }
+        .reveal em { color: var(--oaf-cyan); font-style: normal; font-weight: 600; }
+
+        .reveal code {
+            font-family: var(--font-mono);
+            background: rgba(123,66,188,0.18);
+            color: #E8D5FF;
+            padding: 0.08em 0.4em;
+            border-radius: 4px;
+            font-size: 0.85em;
+            border: 1px solid rgba(123,66,188,0.35);
+        }
+
+        .reveal pre {
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(123,66,188,0.3);
+            border-radius: 10px;
+            font-size: 0.5em;
+        }
+        .reveal pre code {
+            padding: 1em 1.2em;
+            background: #0e0e22;
+            border: none;
+            max-height: 440px;
+        }
+
+        .reveal blockquote {
+            border-left: 4px solid var(--oaf-aws);
+            background: linear-gradient(90deg, rgba(255,153,0,0.10), transparent);
+            padding: 0.6em 1em;
+            font-style: normal;
+            border-radius: 0 8px 8px 0;
+            box-shadow: none;
+            width: 90%;
+        }
+
+        /* ---------- Componentes utilitários ---------- */
+
+        .eyebrow {
+            display: inline-block;
+            font-family: var(--font-mono);
+            font-size: 0.55em;
+            font-weight: 500;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            color: var(--oaf-aws);
+            padding: 0.3em 0.8em;
+            border: 1px solid rgba(255,153,0,0.4);
+            border-radius: 999px;
+            background: rgba(255,153,0,0.06);
+            margin-bottom: 0.9em;
+        }
+
+        .eyebrow.cyan { color: var(--oaf-cyan); border-color: rgba(0,229,255,0.4); background: rgba(0,229,255,0.06); }
+        .eyebrow.purple { color: var(--oaf-purple-2); border-color: rgba(157,92,224,0.5); background: rgba(157,92,224,0.08); }
+        .eyebrow.pink { color: var(--oaf-pink); border-color: rgba(255,61,127,0.4); background: rgba(255,61,127,0.06); }
+
+        .gradient-text {
+            background: linear-gradient(135deg, var(--oaf-purple-2) 0%, var(--oaf-cyan) 50%, var(--oaf-aws) 100%);
+            -webkit-background-clip: text; background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .mono { font-family: var(--font-mono); }
+        .muted { color: var(--oaf-muted); }
+        .small { font-size: 0.7em; }
+        .tiny { font-size: 0.52em; }
+
+        /* Cards em grid */
+        .card-grid {
+            display: grid;
+            gap: 14px;
+            margin-top: 0.8em;
+            font-size: 0.72em;
+        }
+        .card-grid.cols-2 { grid-template-columns: 1fr 1fr; }
+        .card-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+        .card-grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
+
+        .card {
+            background: linear-gradient(160deg, rgba(123,66,188,0.10), rgba(0,229,255,0.04));
+            border: 1px solid rgba(123,66,188,0.30);
+            border-radius: 12px;
+            padding: 0.9em 1em;
+            text-align: left;
+            position: relative;
+            overflow: hidden;
+        }
+        .card::before {
+            content: "";
+            position: absolute; top: 0; left: 0; right: 0; height: 2px;
+            background: linear-gradient(90deg, var(--oaf-purple-2), var(--oaf-cyan), var(--oaf-aws));
+        }
+        .card h4 { margin: 0 0 0.35em; font-size: 0.95em; }
+        .card p { margin: 0; font-size: 0.82em; color: var(--oaf-text); opacity: 0.85; line-height: 1.4; }
+        .card .icon {
+            font-family: var(--font-mono);
+            font-size: 1.4em;
+            font-weight: 800;
+            color: var(--oaf-aws);
+            display: block;
+            margin-bottom: 0.25em;
+        }
+
+        /* Pílulas de tecnologias */
+        .pill-row { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-top: 1em; }
+        .pill {
+            font-family: var(--font-mono);
+            font-size: 0.52em;
+            padding: 0.4em 0.8em;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.12);
+            color: var(--oaf-text);
+        }
+        .pill.purple { border-color: var(--oaf-purple); color: var(--oaf-purple-2); background: rgba(123,66,188,0.12); }
+        .pill.aws { border-color: var(--oaf-aws); color: var(--oaf-aws); background: rgba(255,153,0,0.10); }
+        .pill.cyan { border-color: var(--oaf-cyan); color: var(--oaf-cyan); background: rgba(0,229,255,0.10); }
+
+        /* Title slide */
+        .title-slide { text-align: left !important; }
+        .title-slide h1 {
+            font-size: 2em;
+            line-height: 0.95;
+            margin-bottom: 0.3em;
+        }
+        .title-slide .subtitle {
+            font-family: var(--font-mono);
+            font-size: 0.78em;
+            color: var(--oaf-muted);
+            margin-bottom: 1em;
+        }
+        .title-slide .meta {
+            font-family: var(--font-mono);
+            font-size: 0.52em;
+            color: var(--oaf-muted);
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 0.9em;
+            margin-top: 1.2em;
+        }
+        .title-slide .meta strong { color: var(--oaf-aws); font-weight: 600; }
+
+        /* Diagrama de fluxo (slide arquitetura) */
+        .flow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin: 0.7em 0;
+            font-family: var(--font-mono);
+            font-size: 0.48em;
+        }
+        .flow .step {
+            padding: 0.6em 0.9em;
+            background: rgba(123,66,188,0.15);
+            border: 1px solid var(--oaf-purple);
+            border-radius: 8px;
+            color: var(--oaf-text);
+            white-space: nowrap;
+        }
+        .flow .step.aws { border-color: var(--oaf-aws); background: rgba(255,153,0,0.10); color: var(--oaf-aws); }
+        .flow .step.cyan { border-color: var(--oaf-cyan); background: rgba(0,229,255,0.10); color: var(--oaf-cyan); }
+        .flow .arrow { color: var(--oaf-muted); font-size: 1.3em; }
+
+        /* Demo timeline */
+        .timeline {
+            list-style: none !important;
+            margin: 0 !important;
+            padding: 0;
+            font-size: 0.68em;
+        }
+        .timeline li {
+            padding: 0.55em 0 0.55em 2.2em;
+            border-left: 2px solid rgba(123,66,188,0.3);
+            margin-left: 0.5em;
+            position: relative;
+        }
+        .timeline li::before {
+            content: attr(data-time);
+            position: absolute;
+            left: -1.4em;
+            top: 0.55em;
+            font-family: var(--font-mono);
+            font-size: 0.68em;
+            background: var(--oaf-bg-deep);
+            color: var(--oaf-aws);
+            padding: 0.2em 0.45em;
+            border: 1px solid var(--oaf-aws);
+            border-radius: 4px;
+            font-weight: 600;
+        }
+        .timeline li strong { display: block; color: var(--oaf-text); margin-bottom: 0.1em; }
+        .timeline li span { color: var(--oaf-muted); font-size: 0.82em; }
+
+        /* Stats / numbers */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 18px;
+            margin: 1.2em 0;
+        }
+        .stat .num {
+            font-family: var(--font-mono);
+            font-size: 2em;
+            font-weight: 800;
+            color: var(--oaf-aws);
+            line-height: 1;
+            display: block;
+        }
+        .stat .label {
+            font-size: 0.52em;
+            font-family: var(--font-mono);
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--oaf-muted);
+            margin-top: 0.35em;
+            display: block;
+        }
+        .stat:nth-child(2) .num { color: var(--oaf-cyan); }
+        .stat:nth-child(3) .num { color: var(--oaf-purple-2); }
+        .stat:nth-child(4) .num { color: var(--oaf-pink); }
+
+        /* Comparison columns */
+        .compare {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            font-size: 0.72em;
+            text-align: left;
+        }
+        .compare .col {
+            padding: 0.9em;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .compare .col.before { background: rgba(255,61,127,0.06); border-color: rgba(255,61,127,0.3); }
+        .compare .col.after  { background: rgba(46,230,166,0.06); border-color: rgba(46,230,166,0.3); }
+        .compare .col h4 { margin-top: 0; }
+        .compare .col.before h4 { color: var(--oaf-pink); }
+        .compare .col.after  h4 { color: var(--oaf-green); }
+
+        /* Slide number / progress */
+        .reveal .slide-number {
+            font-family: var(--font-mono);
+            background: rgba(10,10,22,0.7);
+            color: var(--oaf-muted);
+            border: 1px solid rgba(123,66,188,0.3);
+            border-radius: 999px;
+            padding: 4px 12px;
+            font-size: 11px;
+        }
+        .reveal .progress {
+            color: var(--oaf-aws);
+            height: 3px;
+        }
+
+        /* Watermark / footer mark */
+        .footer-mark {
+            position: fixed;
+            bottom: 18px;
+            left: 30px;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--oaf-muted);
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            z-index: 100;
+            pointer-events: none;
+        }
+        .footer-mark .dot { color: var(--oaf-aws); }
+
+        /* Sponsors / Tech logos row */
+        .tech-row {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-top: 0.8em;
+        }
+        .tech-row .tech {
+            font-family: var(--font-mono);
+            font-size: 0.52em;
+            padding: 0.55em 0.9em;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            color: var(--oaf-text);
+        }
+
+        /* Two column layout helper */
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            text-align: left;
+            font-size: 0.75em;
+        }
+        .two-col h3 { font-size: 1.05em; margin-bottom: 0.35em; }
+
+        /* Big headline slide */
+        .headline {
+            font-size: 2.2em !important;
+            font-weight: 800;
+            line-height: 0.95;
+            letter-spacing: -0.04em;
+            text-align: left;
+        }
+
+        /* QR placeholder block (link) */
+        .link-block {
+            display: inline-block;
+            padding: 0.8em 1.4em;
+            background: linear-gradient(135deg, rgba(123,66,188,0.15), rgba(0,229,255,0.10));
+            border: 1px solid var(--oaf-purple);
+            border-radius: 12px;
+            font-family: var(--font-mono);
+            font-size: 0.65em;
+            margin-top: 0.8em;
+        }
+        .link-block .url { color: var(--oaf-cyan); font-weight: 600; }
+
+        /* Print / PDF tweaks */
+        @media print {
+            .reveal-viewport::before { display: none; }
+        }
+    </style>
+
+</head>
+<body>
+
+<div class="footer-mark">OpenArchFlow <span class="dot">●</span> 30min talk</div>
+
+<div class="reveal">
+    <div class="slides">
+
+        <!-- ============================================================
+             SLIDE 1 — TÍTULO  (1 min)
+             ============================================================ -->
+        <section class="title-slide">
+            <span class="eyebrow">Talk · 30 min · Demo ao vivo</span>
+            <h1>Da <span class="gradient-text">linguagem natural</span><br>ao Terraform pronto pra produção na AWS.</h1>
+            <p class="subtitle">// Como uma IA Open Source desenha, precifica e provisiona arquiteturas AWS</p>
+            <div class="meta">
+                <strong>OpenArchFlow</strong> · v0.7.0 ·
+                AI-Powered AWS Architecture Diagram Generator<br>
+                github.com/dmux/OpenArchFlow · MIT License
+            </div>
+        </section>
+
+        <!-- ============================================================
+             SLIDE 2 — QUEM SOU EU / AGENDA  (1 min)
+             ============================================================ -->
+        <section>
+            <span class="eyebrow cyan">Agenda</span>
+            <h2>30 minutos, 5 atos.</h2>
+            <ul class="timeline" style="margin-top: 0.8em;">
+                <li data-time="00:00"><strong>O problema</strong><span>Por que arquitetar na AWS ainda dói em 2026.</span></li>
+                <li data-time="04:00"><strong>O que é OpenArchFlow</strong><span>PWA open source, local-first, dual-AI, zero backend.</span></li>
+                <li data-time="08:00"><strong>Demo ao vivo</strong><span>Do prompt ao diagrama, ao custo, ao Terraform — em 12 minutos.</span></li>
+                <li data-time="20:00"><strong>Como funciona por dentro</strong><span>Gemini + WebLLM + MCP + IaC abstraction.</span></li>
+                <li data-time="26:00"><strong>Quando usar (e quando não)</strong><span>+ roadmap, contribuição e Q&amp;A.</span></li>
+            </ul>
+        </section>
+
+        <!-- ============================================================
+             SLIDE 3 — O PROBLEMA  (1 min)
+             ============================================================ -->
+        <section>
+            <span class="eyebrow pink">Ato 1 · O Problema</span>
+            <h2>Desenhar arquitetura AWS é<br><span class="gradient-text">caro, lento e desconectado.</span></h2>
+            <div class="card-grid cols-3" style="margin-top: 1.2em;">
+                <div class="card">
+                    <span class="icon">01</span>
+                    <h4>Diagramas que mentem</h4>
+                    <p>Draw.io, Lucidchart, Excalidraw — ótimas ferramentas de desenho. Mas o diagrama não sabe quanto custa, nem vira código.</p>
+                </div>
+                <div class="card">
+                    <span class="icon">02</span>
+                    <h4>Custos descobertos na fatura</h4>
+                    <p>Estimar EC2 + RDS + Lambda + S3 antes do deploy é trabalho manual de horas — quando alguém faz.</p>
+                </div>
+                <div class="card">
+                    <span class="icon">03</span>
+                    <h4>Do desenho ao IaC: retrabalho</h4>
+                    <p>Aprovou a arquitetura? Agora reescreva tudo em Terraform/CDK na unha. Drift garantido entre Confluence e <code>main.tf</code>.</p>
+                </div>
+            </div>
+            <p style="margin-top: 1.2em; font-size: 0.65em;" class="muted">
+                Resultado: a documentação envelhece em horas, o custo é surpresa, e o IaC vira o "trabalho real" depois da reunião.
+            </p>
+        </section>
+
+        <!-- ============================================================
+             SLIDE 4 — A PROPOSTA  (1 min)
+             ============================================================ -->
+        <section>
+            <span class="eyebrow">Ato 2 · A Proposta</span>
+            <h2>E se o <em>diagrama</em> fosse a fonte da verdade?</h2>
+            <div class="flow" style="margin-top: 1.8em;">
+                <span class="step cyan">Prompt em linguagem natural</span>
+                <span class="arrow">→</span>
+                <span class="step">Diagrama interativo</span>
+                <span class="arrow">→</span>
+                <span class="step aws">Custo mensal estimado</span>
+                <span class="arrow">→</span>
+                <span class="step">Terraform .tf</span>
+            </div>
+            <p style="margin-top: 1.8em; font-size: 0.8em;" class="muted">
+                Um único artefato — editável, versionável, exportável — que carrega <em>desenho</em>, <em>custo</em> e <em>infraestrutura como código</em> na mesma fonte.
+            </p>
+            <div class="link-block" style="margin-top: 1.8em;">
+                $ <span class="url">openarchflow.cloud</span> &nbsp;·&nbsp; sem cadastro · sem backend · 100% no browser
+            </div>
+        </section>
+
+        <!-- ============================================================
+             SLIDE 5 — O QUE É OPENARCHFLOW  (1 min)
+             ============================================================ -->
+        <section>
+            <span class="eyebrow purple">O Produto</span>
+            <h2>OpenArchFlow em uma frase.</h2>
+            <p style="font-size: 1.25em; line-height: 1.3; margin: 0.8em 0; max-width: 90%;" class="gradient-text">
+                Um PWA open source que transforma descrições em linguagem natural em diagramas AWS interativos —
+                com custo estimado e Terraform exportável.
+            </p>
+
+            <div class="stats" style="margin-top: 1.8em;">
+                <div class="stat">
+                    <span class="num">100%</span>
+                    <span class="label">Client-side</span>
+                </div>
+                <div class="stat">
+                    <span class="num">2</span>
+                    <span class="label">AI engines (cloud + local)</span>
+                </div>
+                <div class="stat">
+                    <span class="num">60+</span>
+                    <span class="label">Resources Terraform</span>
+                </div>
+                <div class="stat">
+                    <span class="num">MIT</span>
+                    <span class="label">License</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================
+             SLIDE 6 — PILARES  (1 min)
+             ============================================================ -->
+        <section>
+            <span class="eyebrow cyan">Pilares de design</span>
+            <h2>4 escolhas que mudam tudo.</h2>
+            <div class="card-grid cols-2">
+                <div class="card">
+                    <h4>🔒 Local-first &amp; privacy-first</h4>
+                    <p>Todos os diagramas vivem em <code>localStorage</code>/<code>IndexedDB</code>. Sem cadastro, sem telemetria, sem backend que armazena nada. Você é dono dos seus desenhos.</p>
+                </div>
+                <div class="card">
+                    <h4>🤖 Dual AI Engine</h4>
+                    <p><em>Cloud AI</em> com Gemini 2.5 Flash para velocidade. <em>Local AI</em> com WebLLM (Phi-3-mini via WebGPU) para uso offline e dados sensíveis — sem API key.</p>
+                </div>
+                <div class="card">
+                    <h4>💰 Custo no momento certo</h4>
+                    <p>Integração direta com a <strong>AWS Price List API</strong>. Bill of Materials consolidada, exportável em CSV, antes de qualquer <code>terraform apply</code>.</p>
+                </div>
+                <div class="card">
+                    <h4>🏗️ IaC pluggable</h4>
+                    <p>Interface <code>IaCGenerator</code> abstrata. Hoje gera Terraform; amanhã CDK, Pulumi ou CloudFormation — sem tocar a UI.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================
+             SLIDE 7 — DEMO TRANSITION  (1 min)
+             ============================================================ -->
+        <section data-background-gradient="linear-gradient(135deg, #1a0d2e 0%, #0a0a16 100%)">
+            <span class="eyebrow pink">Ato 3 · Live Demo</span>
+            <h1 class="headline">
+                Hora de ver<br>
+                <span class="gradient-text">funcionando.</span>
+            </h1>
+            <p style="margin-top: 1.2em; font-size: 0.9em;" class="muted mono">// 12 minutos · 6 funcionalidades · 1 arquitetura real</p>
+            <div class="link-block">
+                Demo: <span class="url">localhost:3000</span> · Cenário: <strong>API Serverless de processamento de pedidos</strong>
+            </div>
+        </section>
+
+        <!-- ============================================================
+             SLIDE 8 — DEMO ROADMAP  (1 min)
+             ============================================================ -->
+        <section>
+            <span class="eyebrow">Roteiro da Demo</span>
+            <h2>O que vamos ver, na ordem.</h2>
+            <ul class="timeline" style="margin-top: 0.6em;">
+                <li data-time="① 2min"><strong>Geração com IA</strong><span>Prompt → diagrama AWS auto-organizado.</span></li>
+                <li data-time="② 2min"><strong>Edição visual</strong><span>Drag-and-drop, agrupamento por VPC/Subnet, alinhamento.</span></li>
+                <li data-time="③ 2min"><strong>Custo em tempo real</strong><span>BOM, configuração por nó, export CSV.</span></li>
+                <li data-time="④ 2min"><strong>Simulação de tráfego</strong><span>Latência, falhas, fault injection.</span></li>
+                <li data-time="⑤ 3min"><strong>Export Terraform</strong><span>main.tf, variables.tf, outputs.tf — pronto pra produção.</span></li>
+                <li data-time="⑥ 1min"><strong>Colaboração P2P</strong><span>Link E2EE, WebRTC, sem servidor central.</span></li>
+            </ul>
+        </section>
+
+        <!-- ============================================================
+             SLIDE 9 — DEMO STEP 1: AI GENERATION
+             ============================================================ -->
+        <section>
+            <span class="eyebrow cyan">Demo · Passo 1</span>
+            <h3>Geração com IA</h3>
+            <h2>Do prompt ao diagrama em segundos.</h2>
+            <div class="two-col" style="margin-top: 1em;">
+                <div>
+                    <h4>Input</h4>
+                    <pre><code class="language-text" data-noescape>API serverless de processamento
+de pedidos com:
+
+- API Gateway na borda
+- Lambda de validação
+- DynamoDB de pedidos
+- SQS para fanout
+- Lambda worker
+- S3 para anexos
+- Tudo numa VPC com 2 AZs</code></pre>
+                </div>
+                <div>
+                    <h4>O que a IA faz</h4>
+                    <ul style="font-size: 0.8em;">
+                        <li>Identifica 7 serviços AWS canônicos</li>
+                        <li>Aplica <em>AWS Documentation MCP</em> para best-practices</li>
+                        <li>Conecta os nós com edges semânticos</li>
+                        <li>Agrupa em VPC + Availability Zones</li>
+                        <li>Auto-layout com algoritmo <code>dagre</code></li>
+                    </ul>
+                    <p class="tiny muted" style="margin-top: 0.8em;">⚡ Modo <em>incremental</em>: pedir "adicione um CloudFront na frente" não recomeça do zero — a IA modifica o diagrama existente.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================
+             SLIDE 10 — DEMO STEP 2: EDIÇÃO VISUAL
+             ============================================================ -->
+        <section>
+            <span class="eyebrow cyan">Demo · Passo 2</span>
+            <h3>Edição visual</h3>
+            <h2>Quando a IA acerta 80%, você refina os 20%.</h2>
+            <div class="card-grid cols-3" style="margin-top: 0.8em;">
+                <div class="card">
+                    <h4>📦 Grupos AWS prontos</h4>
+                    <p>VPC, Subnet pública/privada, AZ, Region, On-Premises, Security Zone — pré-estilizados, paridade com draw.io.</p>
+                </div>
+                <div class="card">
+                    <h4>⌨️ Atalhos de produtividade</h4>
+                    <p><code>Ctrl+Z/Y</code>, <code>Ctrl+C/V/D</code>, <code>Ctrl+L</code> auto-layout, <code>Ctrl+A</code> select all, <code>Ctrl+?</code> help.</p>
+                </div>
+                <div class="card">
+                    <h4>📐 Alinhamento Figma-style</h4>
+                    <p>Snap-to-grid 16px, smart guides durante drag, alignment toolbar para 2+ nós selecionados.</p>
+                </div>
+                <div class="card">
+                    <h4>🎨 Style panels</h4>
+                    <p>Cor, borda, opacidade, roteamento de edges (smooth/straight/step/bezier), linhas tracejadas.</p>
+                </div>
+                <div class="card">
+                    <h4>📚 Templates &amp; bibliotecas</h4>
+                    <p>Three-Tier, Serverless API, Event-Driven, Microservices, Data Lake, ML Pipeline, DR Multi-Region.</p>
+                </div>
+                <div class="card">
+                    <h4>🗂️ Camadas (Layers)</h4>
+                    <p>Mostrar/ocultar/lock por camada — separe rede, compute e dados em vistas independentes.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================
+             SLIDE 11 — DEMO STEP 3: PRICING
+             ============================================================ -->
+        <section>
+            <span class="eyebrow cyan">Demo · Passo 3</span>
+            <h3>Custo em tempo real</h3>
+            <h2>Antes do <code>apply</code>, depois do desenho.</h2>
+            <div class="two-col" style="margin-top: 0.8em;">
+                <div>
+                    <h4>Como funciona</h4>
+                    <ul style="font-size: 0.8em;">
+                        <li>Cada nó AWS expõe um painel de <em>configuração de uso</em></li>
+                        <li>Region, instance type, GB de storage, requests/mês</li>
+                        <li>Consulta direta à <strong>AWS Price List API</strong> (us-east-1 endpoint, dados globais)</li>
+                        <li>Cobertura: EC2, RDS, Lambda, S3, EFS, SQS</li>
+                        <li>Bill of Materials consolidada com total mensal</li>
+                        <li>Export CSV pra colar na proposta comercial</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4>BOM de exemplo</h4>
+                    <pre style="font-size: 0.48em;"><code class="language-text">RESOURCE              QTY   USAGE         USD/MO
+─────────────────────────────────────────────────
+API Gateway HTTP       1    1M req/mo      $1.00
+Lambda (validate)      1    1M @ 256MB     $0.83
+Lambda (worker)        1    1M @ 512MB     $1.67
+DynamoDB On-Demand     1    50GB + 1M wr   $14.20
+SQS Standard           1    1M msg         $0.40
+S3 Standard            1    100GB          $2.30
+─────────────────────────────────────────────────
+TOTAL ESTIMADO                            $20.40 /mo</code></pre>
+                    <p class="tiny muted">Valores ilustrativos · cálculo real é live na API.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================
+             SLIDE 12 — DEMO STEP 4: SIMULATION
+             ============================================================ -->
+        <section>
+            <span class="eyebrow purple">Demo · Passo 4</span>
+            <h3>Simulação de tráfego &amp; falhas</h3>
+            <h2>O diagrama vira um <em>laboratório</em>.</h2>
+            <div class="card-grid cols-2" style="margin-top: 0.8em;">
+                <div class="card">
+                    <h4>🌊 Live traffic visualization</h4>
+                    <p>Edges pulsam em verde (active), vermelho (error) ou laranja (throttled). 1×, 2×, 5× multiplier.</p>
+                </div>
+                <div class="card">
+                    <h4>📊 Métricas por nó</h4>
+                    <p>Requests, error %, p95 de latência, cache hit %, custo cumulativo. Tabela exportável.</p>
+                </div>
+                <div class="card">
+                    <h4>🔬 Trace viewer</h4>
+                    <p>Waterfall por requisição, hop a hop, com latência e status — estilo X-Ray, mas no browser.</p>
+                </div>
+                <div class="card">
+                    <h4>💀 Fault injection</h4>
+                    <p>Botão <em>Kill / Restore</em> em qualquer nó. Ajuste latência e failure rate <strong>ao vivo</strong>, durante a simulação.</p>
+                </div>
+            </div>
+            <p class="tiny muted" style="margin-top: 0.8em;">
+                Templates como <em>Serverless Circuit Breaker</em> e <em>ECS + App Mesh</em> já vêm com falhas configuradas para você ver o circuito abrindo na hora.
+            </p>
+        </section>
+
+        <!-- ============================================================
+             SLIDE 13 — DEMO STEP 5: TERRAFORM (a estrela)
+             ============================================================ -->
+        <section>
+            <span class="eyebrow purple">Demo · Passo 5 · ⭐ destaque da v0.7</span>
+            <h3>Export Terraform</h3>
+            <h2>Do diagrama para <code>.tf</code> em um clique.</h2>
+            <pre style="margin-top: 0.6em;"><code class="language-hcl" data-trim>terraform {
+  required_providers {
+    aws = { source = "hashicorp/aws", version = "~> 5.0" }
+  }
+}
+
+provider "aws" {
+  region = var.aws_region
+}
+
+resource "aws_lambda_function" "validate_order" {
+  function_name = "validate-order"
+  role          = aws_iam_role.lambda_exec.arn
+  handler       = "index.handler"
+  runtime       = "nodejs20.x"
+  memory_size   = 256
+}
+
+resource "aws_dynamodb_table" "orders" {
+  name         = "orders"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "order_id"
+  attribute { name = "order_id"; type = "S" }
+}
+
+resource "aws_sqs_queue" "fanout" {
+  name = "order-fanout"
+}
+
+# depends_on inferido a partir das edges do diagrama
+
+resource "aws_apigatewayv2_route" "post_orders" {
+  api_id    = aws_apigatewayv2_api.http.id
+  route_key = "POST /orders"
+  target    = "integrations/${aws_apigatewayv2_integration.lambda.id}"
+  depends_on = [aws_lambda_function.validate_order]
+}</code></pre>
+        </section>
+
+        <!-- ============================================================
+             SLIDE 14 — TERRAFORM DETAILS
+             ============================================================ -->
+        <section>
+            <span class="eyebrow purple">Por trás do export</span>
+            <h2>Não é template-string. É <em>schema-aware</em>.</h2>
+            <div class="card-grid cols-2" style="margin-top: 0.8em;">
+                <div class="card">
+                    <h4>60+ mappings AWS → Terraform</h4>
+                    <p>EC2, Lambda, RDS, DynamoDB, S3, VPC, ALB, API Gateway, CloudFront, Route 53, SQS, SNS, EKS, ECS, ElastiCache, ECR…</p>
+                </div>
+                <div class="card">
+                    <h4>3 arquivos, organização padrão</h4>
+                    <p><code>main.tf</code> (resources + provider) · <code>variables.tf</code> · <code>outputs.tf</code> — direto pro <code>terraform init</code>.</p>
+                </div>
+                <div class="card">
+                    <h4>AI-enhanced via MCP</h4>
+                    <p>Endpoint <code>/api/generate-terraform</code> combina Gemini 2.5 Flash com o <strong>HashiCorp Terraform MCP server</strong> — IAM roles e security groups vêm de schemas reais.</p>
+                </div>
+                <div class="card">
+                    <h4>Editor Monaco com HCL</h4>
+                    <p>Syntax highlighting, bracket matching, snippets. Temas <code>terraform-dark</code> e <code>terraform-light</code>, fullscreen, copy &amp; download.</p>
+                </div>
+            </div>
+            <p class="tiny muted" style="margin-top: 0.8em;">
+                Per-node IaC config: sobrescreva o tipo de recurso e o nome direto no Properties Panel — o que aparece como <code>aws_lambda_function.validate_order</code> no HCL.
+            </p>
+        </section>
+
+        <!-- ============================================================
+             SLIDE 15 — DEMO STEP 6: COLLABORATION
+             ============================================================ -->
+        <section>
+            <span class="eyebrow cyan">Demo · Passo 6</span>
+            <h3>Colaboração P2P em tempo real</h3>
+            <h2>Sem servidor central. <em>Zero-knowledge.</em></h2>
+            <div class="flow" style="margin-top: 1.2em;">
+                <span class="step cyan">Browser A</span>
+                <span class="arrow">⟷ WebRTC ⟷</span>
+                <span class="step">Yjs CRDT</span>
+                <span class="arrow">⟷</span>
+                <span class="step cyan">Browser B</span>
+            </div>
+            <div class="two-col" style="margin-top: 1.2em;">
+                <div>
+                    <h4>Como funciona</h4>
+                    <ul style="font-size: 0.8em;">
+                        <li>Sincronização <strong>direta browser-to-browser</strong> via WebRTC</li>
+                        <li>CRDT (Yjs) resolve conflitos sem coordenação</li>
+                        <li>Chave de criptografia vai no <code>#fragment</code> da URL</li>
+                        <li>Servidor de signaling <strong>nunca</strong> recebe a chave</li>
+                        <li>Cursores remotos com nome do peer</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4>O que isso significa</h4>
+                    <p style="font-size: 0.8em;">
+                        Você desenha com seu cliente em tempo real, compartilhando um link, e <em>nem o servidor de signaling consegue ler o conteúdo</em> do diagrama.
+                    </p>
+                    <p style="font-size: 0.8em;" class="muted">
+                        Para uma ferramenta de arquitetura corporativa, isso muda a conversa de compliance.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================
+             SLIDE 16 — ATO 4: ARQUITETURA INTERNA
+             ============================================================ -->
+        <section data-background-gradient="linear-gradient(135deg, #0d1a2e 0%, #0a0a16 100%)">
+            <span class="eyebrow purple">Ato 4 · Sob o capô</span>
+            <h1 class="headline">Como isso<br><span class="gradient-text">funciona?</span></h1>
+            <p class="muted mono small" style="margin-top: 1.2em;">// stack, fluxo de dados e a abstração que torna tudo plugável</p>
+        </section>
+
+        <!-- ============================================================
+             SLIDE 17 — TECH STACK
+             ============================================================ -->
+        <section>
+            <span class="eyebrow">Stack</span>
+            <h2>Próximo a <em>nada</em> de backend.</h2>
+            <div class="two-col" style="margin-top: 0.8em;">
+                <div>
+                    <h4>Frontend</h4>
+                    <div class="pill-row" style="justify-content: flex-start;">
+                        <span class="pill">Next.js 16+ App Router</span>
+                        <span class="pill">TypeScript</span>
+                        <span class="pill">Tailwind + shadcn/ui</span>
+                        <span class="pill">React Flow</span>
+                        <span class="pill">dagre</span>
+                        <span class="pill">Zustand + zundo</span>
+                        <span class="pill">Monaco + HCL</span>
+                    </div>
+                </div>
+                <div>
+                    <h4>IA &amp; integrações</h4>
+                    <div class="pill-row" style="justify-content: flex-start;">
+                        <span class="pill cyan">Google Gemini 2.5 Flash</span>
+                        <span class="pill cyan">WebLLM (Phi-3-mini)</span>
+                        <span class="pill cyan">WebGPU</span>
+                        <span class="pill aws">AWS Price List API</span>
+                        <span class="pill aws">AWS Documentation MCP</span>
+                        <span class="pill purple">Terraform MCP server</span>
+                    </div>
+                </div>
+                <div>
+                    <h4>Colaboração</h4>
+                    <div class="pill-row" style="justify-content: flex-start;">
+                        <span class="pill">Yjs (CRDT)</span>
+                        <span class="pill">y-webrtc</span>
+                        <span class="pill">Signaling em Fly.io</span>
+                    </div>
+                </div>
+                <div>
+                    <h4>Persistência</h4>
+                    <div class="pill-row" style="justify-content: flex-start;">
+                        <span class="pill">localStorage</span>
+                        <span class="pill">IndexedDB</span>
+                        <span class="pill">JSON export/backup</span>
+                    </div>
+                </div>
+            </div>
+            <p class="tiny muted" style="margin-top: 1.2em;">
+                Servidor existe apenas para: (1) signaling WebRTC e (2) o endpoint <code>/api/generate-terraform</code> que orquestra Gemini + MCP.
+            </p>
+        </section>
+
+        <!-- ============================================================
+             SLIDE 18 — IaC ABSTRACTION
+             ============================================================ -->
+        <section>
+            <span class="eyebrow purple">A peça-chave</span>
+            <h2>A abstração <code>IaCGenerator</code>.</h2>
+            <pre style="margin-top: 0.8em;"><code class="language-typescript" data-trim>// src/lib/iac/types.ts
+export interface IaCGenerator {
+  readonly name: string;          // "terraform" | "cdk" | "pulumi"
+  readonly fileExtension: string; // ".tf" | ".ts" | ".py"
+
+  generate(
+    nodes: AppNode[],
+    edges: AppEdge[],
+    options?: IaCGenerationOptions
+  ): Promise&lt;IaCFileSet&gt;;
+
+  supportsResource(awsServiceType: string): boolean;
+}
+
+// src/lib/iac/terraform/generator.ts
+export class TerraformGenerator implements IaCGenerator {
+  name = "terraform";
+  fileExtension = ".tf";
+
+  async generate(nodes, edges) {
+    const resources    = nodes.map(n =&gt; mapToResource(n));
+    const dependencies = inferDependsOn(edges);
+    return {
+      "main.tf":      renderMain(resources, dependencies),
+      "variables.tf": renderVariables(resources),
+      "outputs.tf":   renderOutputs(resources)
+    };
+  }
+}</code></pre>
+            <p class="tiny muted" style="margin-top: 0.5em;">
+                Adicionar Pulumi amanhã = uma nova classe. A UI não muda.
+            </p>
+        </section>
+
+        <!-- ============================================================
+             SLIDE 19 — FLUXO COMPLETO
+             ============================================================ -->
+        <section>
+            <span class="eyebrow cyan">Pipeline mental</span>
+            <h2>O fluxo end-to-end.</h2>
+            <div style="margin-top: 1.2em; font-family: var(--font-mono); font-size: 0.48em; line-height: 1.75; text-align: left; max-width: 95%; margin-left: auto; margin-right: auto;">
+                <div style="display: grid; grid-template-columns: auto 1fr; gap: 6px 14px;">
+                    <span style="color: var(--oaf-aws);">①</span> <span>Usuário digita prompt → <code>"API serverless com Lambda + DynamoDB"</code></span>
+                    <span style="color: var(--oaf-aws);">②</span> <span>Cliente escolhe <em>Cloud AI</em> ou <em>Local AI</em> (toggle no toolbar)</span>
+                    <span style="color: var(--oaf-aws);">③</span> <span>Gemini 2.5 Flash recebe prompt + contexto MCP de AWS Docs → JSON estruturado</span>
+                    <span style="color: var(--oaf-aws);">④</span> <span>Parser monta <code>AppNode[]</code> + <code>AppEdge[]</code> → Zustand store</span>
+                    <span style="color: var(--oaf-aws);">⑤</span> <span>React Flow renderiza · dagre auto-organiza · Yjs sincroniza com peers</span>
+                    <span style="color: var(--oaf-aws);">⑥</span> <span>Pricing provider consulta AWS Price List API para cada nó AWS</span>
+                    <span style="color: var(--oaf-aws);">⑦</span> <span>Usuário clica <em>Export Terraform</em> → POST <code>/api/generate-terraform</code></span>
+                    <span style="color: var(--oaf-aws);">⑧</span> <span>Endpoint chama Gemini + Terraform MCP server (Docker) → HCL com schema real</span>
+                    <span style="color: var(--oaf-aws);">⑨</span> <span>Monaco renderiza HCL com 3 abas · botão download · zero servidor armazena</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================
+             SLIDE 20 — EVOLUÇÃO (CHANGELOG)
+             ============================================================ -->
+        <section>
+            <span class="eyebrow">Velocidade de evolução</span>
+            <h2>De fevereiro a maio, <em>sete releases</em>.</h2>
+            <ul class="timeline" style="margin-top: 0.8em; font-size: 0.62em;">
+                <li data-time="0.1.0"><strong>fev/26 — Fundação</strong><span>Canvas, dual AI, AWS docs MCP, simulação básica, multi-diagrama.</span></li>
+                <li data-time="0.2.0"><strong>abr/26 — AWS Groups</strong><span>VPC, Subnets, AZ, Region · networking + 30 serviços novos.</span></li>
+                <li data-time="0.3.0"><strong>abr/26 — Pricing</strong><span>AWS Price List API, BOM panel, CSV export.</span></li>
+                <li data-time="0.4.0"><strong>abr/26 — Colaboração P2P</strong><span>Yjs + WebRTC, E2EE com chave no fragmento da URL.</span></li>
+                <li data-time="0.5.0"><strong>maio/26 — Editor pesado</strong><span>Undo/redo, atalhos, alinhamento, ER, sequência UML, swimlane.</span></li>
+                <li data-time="0.6.0"><strong>maio/26 — Simulação 2.0</strong><span>Live traffic, fault injection, métricas, traces, AWS behaviors.</span></li>
+                <li data-time="0.7.0"><strong>maio/26 — Terraform</strong><span>HCL generation, Monaco, MCP integration, IaC abstraction.</span></li>
+            </ul>
+        </section>
+
+        <!-- ============================================================
+             SLIDE 21 — ATO 5: QUANDO USAR
+             ============================================================ -->
+        <section data-background-gradient="linear-gradient(135deg, #2e1a0d 0%, #0a0a16 100%)">
+            <span class="eyebrow aws">Ato 5 · Honestidade</span>
+            <h1 class="headline">
+                Quando<br>
+                <span class="gradient-text">usar (e quando não).</span>
+            </h1>
+        </section>
+
+        <!-- ============================================================
+             SLIDE 22 — USE CASES vs LIMITES
+             ============================================================ -->
+        <section>
+            <span class="eyebrow">Sweet spot vs limites</span>
+            <h2>Onde brilha. Onde ainda não.</h2>
+            <div class="compare" style="margin-top: 0.8em;">
+                <div class="col after">
+                    <h4>✓ Use quando…</h4>
+                    <ul style="font-size: 0.82em;">
+                        <li>Você está em fase de <strong>discovery / arquitetura inicial</strong></li>
+                        <li>Precisa apresentar <strong>opções com custo</strong> a um stakeholder</li>
+                        <li>Quer um <strong>scaffold Terraform</strong> pra evoluir, não copiar</li>
+                        <li>Faz <strong>workshops de design</strong> com colaboração ao vivo</li>
+                        <li>Quer <strong>prototipar circuit breakers, retry, fallback</strong> sem deploy</li>
+                        <li>Trabalha com <strong>dados sensíveis</strong> e precisa de IA local</li>
+                    </ul>
+                </div>
+                <div class="col before">
+                    <h4>✗ Não use quando…</h4>
+                    <ul style="font-size: 0.82em;">
+                        <li>Você precisa de <strong>módulos Terraform organizacionais</strong> com convenções específicas</li>
+                        <li>Sua arquitetura tem <strong>dezenas de contas, OUs e SCPs</strong> (Landing Zone real)</li>
+                        <li>Você quer <strong>plan/apply automatizado</strong> — OpenArchFlow gera, não executa</li>
+                        <li>Custos precisam ser <strong>auditados em centavos</strong> (use AWS Cost Explorer + Pricing Calculator oficial)</li>
+                        <li>Compliance exige <strong>diagrama em ferramenta corporativa específica</strong></li>
+                    </ul>
+                </div>
+            </div>
+            <p class="tiny muted" style="margin-top: 0.8em;">
+                A regra: <em>OpenArchFlow é o cartão de visita da arquitetura.</em> Não substitui pipelines de IaC maduros — acelera o caminho até eles.
+            </p>
+        </section>
+
+        <!-- ============================================================
+             SLIDE 23 — ROADMAP
+             ============================================================ -->
+        <section>
+            <span class="eyebrow purple">O que vem por aí</span>
+            <h2>Roadmap aberto — e <em>contribuível</em>.</h2>
+            <div class="card-grid cols-3" style="margin-top: 0.8em;">
+                <div class="card">
+                    <h4>🛠️ CDK + Pulumi</h4>
+                    <p>A interface <code>IaCGenerator</code> já está pronta. Falta implementar e mapear os recursos.</p>
+                </div>
+                <div class="card">
+                    <h4>🌍 Multi-cloud first-class</h4>
+                    <p>Azure já tem nós e templates. Próximo: pricing + IaC paridade com AWS.</p>
+                </div>
+                <div class="card">
+                    <h4>🧪 Testes automatizados</h4>
+                    <p>Unit + integration tests é uma das maiores oportunidades de PR para a comunidade.</p>
+                </div>
+                <div class="card">
+                    <h4>🌐 i18n</h4>
+                    <p>UI hoje em inglês. Português, espanhol e japonês são próximos candidatos.</p>
+                </div>
+                <div class="card">
+                    <h4>📱 Mobile</h4>
+                    <p>PWA já instala. Falta UX de toque pesada e gesture handling para tablets.</p>
+                </div>
+                <div class="card">
+                    <h4>🤖 Mais providers de IA</h4>
+                    <p>Anthropic Claude, modelos locais via Ollama, e fine-tuning para AWS Solutions Architect specs.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================
+             SLIDE 24 — CHAMADO À AÇÃO
+             ============================================================ -->
+        <section>
+            <span class="eyebrow cyan">Como participar</span>
+            <h2>Quatro formas de contribuir hoje.</h2>
+            <div class="card-grid cols-4" style="margin-top: 1.2em;">
+                <div class="card"><span class="icon">⭐</span><h4>Estrela</h4><p>github.com/dmux/<br>OpenArchFlow</p></div>
+                <div class="card"><span class="icon">🐛</span><h4>Issue</h4><p>Reporta o bug ou sugere a feature que falta no seu fluxo.</p></div>
+                <div class="card"><span class="icon">🔀</span><h4>PR</h4><p>Conventional commits · ESLint · changelog em <code>[Unreleased]</code>.</p></div>
+                <div class="card"><span class="icon">📢</span><h4>Compartilhe</h4><p>Mostre pra um arquiteto cloud que ainda mantém diagramas no PowerPoint.</p></div>
+            </div>
+            <p style="margin-top: 1.8em;" class="muted small mono">
+                // Built by Rafael Sales · MIT License · construído por arquitetos para arquitetos
+            </p>
+        </section>
+
+        <!-- ============================================================
+             SLIDE 25 — FECHAMENTO / Q&A
+             ============================================================ -->
+        <section data-background-gradient="linear-gradient(135deg, #1a0d2e 0%, #0d1a2e 50%, #2e1a0d 100%)">
+            <span class="eyebrow">Fim · 30 min</span>
+            <h1 class="headline">
+                Obrigado.<br>
+                <span class="gradient-text">Perguntas?</span>
+            </h1>
+            <div style="margin-top: 1.8em; font-family: var(--font-mono); font-size: 0.65em;">
+                <div style="margin: 0.4em 0;"><span class="muted">repo →</span> <span style="color: var(--oaf-cyan);">github.com/dmux/OpenArchFlow</span></div>
+                <div style="margin: 0.4em 0;"><span class="muted">app →</span> <span style="color: var(--oaf-cyan);">openarchflow.cloud</span></div>
+                <div style="margin: 0.4em 0;"><span class="muted">version →</span> <span style="color: var(--oaf-aws);">v0.7.0 · Terraform IaC</span></div>
+            </div>
+            <p class="tiny muted" style="margin-top: 1.8em;">
+                ↑ ↓ ← → para navegar · <code>S</code> para speaker notes · <code>F</code> para fullscreen · <code>?</code> para todos os atalhos
+            </p>
+        </section>
+
+    </div>
+</div>
+
+<!-- Reveal.js scripts -->
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/highlight.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/notes/notes.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/zoom/zoom.js"></script>
+
+<script>
+    Reveal.initialize({
+        hash: true,
+        controls: true,
+        progress: true,
+        slideNumber: 'c/t',
+        transition: 'slide',
+        transitionSpeed: 'default',
+        backgroundTransition: 'fade',
+        center: true,
+        width: 1280,
+        height: 720,
+        margin: 0.04,
+        minScale: 0.1,
+        maxScale: 2.0,
+        plugins: [ RevealHighlight, RevealNotes, RevealZoom ]
+    });
+</script>
+
+</body>
+</html>
