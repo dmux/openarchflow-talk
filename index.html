@@ -655,7 +655,7 @@
             arquiteturas AWS
           </p>
           <div class="meta">
-            <strong>OpenArchFlow</strong> · v0.8.2 · AI-Powered AWS Architecture
+            <strong>OpenArchFlow</strong> · v0.9.0 · AI-Powered AWS Architecture
             Diagram Generator<br />
             github.com/dmux/OpenArchFlow · MIT License
           </div>
@@ -899,6 +899,13 @@
             <li data-time="⑥ 1min">
               <strong>Colaboração P2P</strong
               ><span>Link E2EE, WebRTC, sem servidor central.</span>
+            </li>
+            <li data-time="⑦ 2min">
+              <strong>MiniStack — Deploy local</strong
+              ><span
+                >Do diagrama ao AWS emulado em localhost — sem conta AWS, sem
+                custo.</span
+              >
             </li>
           </ul>
         </section>
@@ -1231,7 +1238,111 @@ resource "aws_apigatewayv2_route" "post_orders" {
         </section>
 
         <!-- ============================================================
-             SLIDE 16 — ATO 4: ARQUITETURA INTERNA
+             SLIDE 16 — DEMO STEP 7: MINISTACK LOCAL DEPLOY
+             ============================================================ -->
+        <section>
+          <span class="eyebrow cyan">Demo</span>
+          <h3>MiniStack — Deploy Local</h3>
+          <h2>Do diagrama ao AWS emulado em <code>localhost</code>.</h2>
+          <div class="two-col" style="margin-top: 0.8em">
+            <div>
+              <h4>Como começar</h4>
+              <pre
+                style="margin-top: 0.4em"
+              ><code class="language-bash" data-trim>docker run -p 4566:4566 \
+  ministackorg/ministack</code></pre>
+              <p style="font-size: 0.75em; margin-top: 0.8em">
+                Clique no ícone <strong>Rocket</strong> na toolbar, configure o
+                endpoint e pressione <em>Deploy All</em>. Status por nó atualiza
+                em tempo real.
+              </p>
+              <h4 style="margin-top: 1em">Capacidades principais</h4>
+              <ul style="font-size: 0.72em">
+                <li>
+                  <strong>Deploy All</strong> com um clique — badges de status
+                  por nó
+                </li>
+                <li>
+                  <strong>Console interativo</strong> por nó: S3 browser, Lambda
+                  invoker, SQS reader…
+                </li>
+                <li>
+                  <strong>Modo híbrido</strong> — simulação usa latência real do
+                  MiniStack
+                </li>
+                <li>
+                  <strong>Traffic Source</strong> — gera req/s configurável
+                  direto do canvas
+                </li>
+                <li>
+                  <strong>Teardown</strong> — remove todos os recursos com um
+                  clique
+                </li>
+                <li>
+                  SDK v3 do browser direto para <code>localhost:4566</code> —
+                  funciona até no Vercel
+                </li>
+              </ul>
+            </div>
+            <div>
+              <h4>Serviços suportados</h4>
+              <div
+                class="card-grid cols-2"
+                style="margin-top: 0.4em; font-size: 0.62em; gap: 8px"
+              >
+                <div class="card" style="padding: 0.55em 0.7em">
+                  <h4 style="font-size: 0.85em; margin-bottom: 0.2em">S3</h4>
+                  <p style="font-size: 0.8em">
+                    Bucket · listar, upload, delete
+                  </p>
+                </div>
+                <div class="card" style="padding: 0.55em 0.7em">
+                  <h4 style="font-size: 0.85em; margin-bottom: 0.2em">
+                    Lambda
+                  </h4>
+                  <p style="font-size: 0.8em">
+                    Invocar, editar config, logs ao vivo
+                  </p>
+                </div>
+                <div class="card" style="padding: 0.55em 0.7em">
+                  <h4 style="font-size: 0.85em; margin-bottom: 0.2em">
+                    DynamoDB
+                  </h4>
+                  <p style="font-size: 0.8em">Tabela · scan, put item</p>
+                </div>
+                <div class="card" style="padding: 0.55em 0.7em">
+                  <h4 style="font-size: 0.85em; margin-bottom: 0.2em">
+                    SQS / SNS
+                  </h4>
+                  <p style="font-size: 0.8em">Enviar, receber, publicar</p>
+                </div>
+                <div class="card" style="padding: 0.55em 0.7em">
+                  <h4 style="font-size: 0.85em; margin-bottom: 0.2em">
+                    API Gateway
+                  </h4>
+                  <p style="font-size: 0.8em">
+                    REST API + rotas + stage · testar endpoints
+                  </p>
+                </div>
+                <div class="card" style="padding: 0.55em 0.7em">
+                  <h4 style="font-size: 0.85em; margin-bottom: 0.2em">
+                    + mais
+                  </h4>
+                  <p style="font-size: 0.8em">
+                    EventBridge, Kinesis, IAM, KMS, Secrets Manager, SSM,
+                    CloudWatch Logs
+                  </p>
+                </div>
+              </div>
+              <p class="tiny muted" style="margin-top: 0.8em">
+                Sem conta AWS · Sem custo de nuvem · 100% local
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================================
+             SLIDE 17 (antigo 16) — ATO 4: ARQUITETURA INTERNA
              ============================================================ -->
         <section
           data-background-gradient="linear-gradient(135deg, #0d1a2e 0%, #0a0a16 100%)"
@@ -1419,51 +1530,60 @@ export class TerraformGenerator implements IaCGenerator {
              ============================================================ -->
         <section>
           <span class="eyebrow">Velocidade de evolução</span>
-          <h2>De fevereiro a maio, <em>7 releases</em>.</h2>
-          <ul class="timeline" style="margin-top: 0.8em; font-size: 0.62em">
-            <li data-time="0.1.0">
-              <strong>fev/26 — Fundação</strong
-              ><span
-                >Canvas, dual AI, AWS docs MCP, simulação básica,
-                multi-diagrama.</span
-              >
-            </li>
-            <li data-time="0.2.0">
-              <strong>abr/26 — AWS Groups</strong
-              ><span
-                >VPC, Subnets, AZ, Region · networking + 30 serviços
-                novos.</span
-              >
-            </li>
-            <li data-time="0.3.0">
-              <strong>abr/26 — Pricing</strong
-              ><span>AWS Price List API, BOM panel, CSV export.</span>
-            </li>
-            <li data-time="0.4.0">
-              <strong>abr/26 — Colaboração P2P</strong
-              ><span>Yjs + WebRTC, E2EE com chave no fragmento da URL.</span>
-            </li>
-            <li data-time="0.5.0">
-              <strong>maio/26 — Editor pesado</strong
-              ><span
-                >Undo/redo, atalhos, alinhamento, ER, sequência UML,
-                swimlane.</span
-              >
-            </li>
-            <li data-time="0.6.0">
-              <strong>maio/26 — Simulação 2.0</strong
-              ><span
-                >Live traffic, fault injection, métricas, traces, AWS
-                behaviors.</span
-              >
-            </li>
-            <li data-time="0.8.0">
-              <strong>maio/26 — Terraform</strong
-              ><span
-                >HCL generation, Monaco, MCP integration, IaC abstraction.</span
-              >
-            </li>
-          </ul>
+          <h2>De fevereiro a maio, <em>8 releases</em>.</h2>
+          <div
+            style="
+              display: grid;
+              grid-template-columns: 1fr 1fr;
+              gap: 0 32px;
+              margin-top: 0.5em;
+            "
+          >
+            <ul class="timeline" style="font-size: 0.54em; line-height: 1.3">
+              <li data-time="0.1.0">
+                <strong>fev/26 — Fundação</strong
+                ><span>Canvas, dual AI, AWS docs MCP, simulação básica.</span>
+              </li>
+              <li data-time="0.2.0">
+                <strong>abr/26 — AWS Groups</strong
+                ><span>VPC, Subnets, AZ, Region · +30 serviços.</span>
+              </li>
+              <li data-time="0.3.0">
+                <strong>abr/26 — Pricing</strong
+                ><span>AWS Price List API, BOM panel, CSV export.</span>
+              </li>
+              <li data-time="0.4.0">
+                <strong>abr/26 — Colaboração P2P</strong
+                ><span>Yjs + WebRTC · E2EE com chave no fragmento da URL.</span>
+              </li>
+            </ul>
+            <ul class="timeline" style="font-size: 0.54em; line-height: 1.3">
+              <li data-time="0.5.0">
+                <strong>maio/26 — Editor pesado</strong
+                ><span
+                  >Undo/redo, atalhos, alinhamento, ER, UML, swimlane.</span
+                >
+              </li>
+              <li data-time="0.6.0">
+                <strong>maio/26 — Simulação 2.0</strong
+                ><span>Live traffic, fault injection, métricas, traces.</span>
+              </li>
+              <li data-time="0.7.0">
+                <strong>maio/26 — Terraform</strong
+                ><span
+                  >HCL generation, Monaco, MCP integration, IaC
+                  abstraction.</span
+                >
+              </li>
+              <li data-time="0.8.0">
+                <strong>maio/26 — MiniStack Deploy</strong
+                ><span
+                  >Deploy local · console interativo por nó · modo
+                  híbrido.</span
+                >
+              </li>
+            </ul>
+          </div>
         </section>
 
         <!-- ============================================================
@@ -1674,7 +1794,9 @@ export class TerraformGenerator implements IaCGenerator {
             </div>
             <div style="margin: 0.4em 0">
               <span class="muted">version →</span>
-              <span style="color: var(--oaf-aws)">v0.8.2 · Terraform IaC</span>
+              <span style="color: var(--oaf-aws)"
+                >v0.9.0 · MiniStack Deploy</span
+              >
             </div>
           </div>
           <p class="tiny muted" style="margin-top: 1.8em">
