@@ -871,43 +871,55 @@
         <section>
           <span class="eyebrow">Roteiro da Demo</span>
           <h2>O que vamos ver, na ordem.</h2>
-          <ul class="timeline" style="margin-top: 0.6em">
-            <li data-time="① 2min">
-              <strong>Geração com IA</strong
-              ><span>Prompt → diagrama AWS auto-organizado.</span>
-            </li>
-            <li data-time="② 2min">
-              <strong>Edição visual</strong
-              ><span
-                >Drag-and-drop, agrupamento por VPC/Subnet, alinhamento.</span
-              >
-            </li>
-            <li data-time="③ 2min">
-              <strong>Custo em tempo real</strong
-              ><span>BOM, configuração por nó, export CSV.</span>
-            </li>
-            <li data-time="④ 2min">
-              <strong>Simulação de tráfego</strong
-              ><span>Latência, falhas, fault injection.</span>
-            </li>
-            <li data-time="⑤ 3min">
-              <strong>Export Terraform</strong
-              ><span
-                >main.tf, variables.tf, outputs.tf — pronto pra produção.</span
-              >
-            </li>
-            <li data-time="⑥ 1min">
-              <strong>Colaboração P2P</strong
-              ><span>Link E2EE, WebRTC, sem servidor central.</span>
-            </li>
-            <li data-time="⑦ 2min">
-              <strong>MiniStack — Deploy local</strong
-              ><span
-                >Do diagrama ao AWS emulado em localhost — sem conta AWS, sem
-                custo.</span
-              >
-            </li>
-          </ul>
+          <div
+            style="
+              display: grid;
+              grid-template-columns: 1fr 1fr;
+              gap: 0 32px;
+              margin-top: 0.6em;
+            "
+          >
+            <ul class="timeline">
+              <li data-time="① 2min">
+                <strong>Geração com IA</strong
+                ><span>Prompt → diagrama AWS auto-organizado.</span>
+              </li>
+              <li data-time="② 2min">
+                <strong>Edição visual</strong
+                ><span
+                  >Drag-and-drop, agrupamento por VPC/Subnet, alinhamento.</span
+                >
+              </li>
+              <li data-time="③ 2min">
+                <strong>Custo em tempo real</strong
+                ><span>BOM, configuração por nó, export CSV.</span>
+              </li>
+              <li data-time="④ 2min">
+                <strong>Simulação de tráfego</strong
+                ><span>Latência, falhas, fault injection.</span>
+              </li>
+            </ul>
+            <ul class="timeline">
+              <li data-time="⑤ 3min">
+                <strong>Export Terraform</strong
+                ><span
+                  >main.tf, variables.tf, outputs.tf — pronto pra
+                  produção.</span
+                >
+              </li>
+              <li data-time="⑥ 1min">
+                <strong>Colaboração P2P</strong
+                ><span>Link E2EE, WebRTC, sem servidor central.</span>
+              </li>
+              <li data-time="⑦ 2min">
+                <strong>MiniStack — Deploy local</strong
+                ><span
+                  >Do diagrama ao AWS emulado em localhost — sem conta AWS, sem
+                  custo.</span
+                >
+              </li>
+            </ul>
+          </div>
         </section>
 
         <!-- ============================================================
@@ -1099,7 +1111,7 @@ TOTAL ESTIMADO                            $20.40 /mo</code></pre>
              SLIDE 13 — DEMO STEP 5: TERRAFORM (a estrela)
              ============================================================ -->
         <section>
-          <span class="eyebrow purple">Demo · ⭐ destaque da v0.8</span>
+          <span class="eyebrow purple">Demo</span>
           <h3>Export Terraform</h3>
           <h2>Do diagrama para <code>.tf</code> em um clique.</h2>
           <pre
@@ -1402,11 +1414,16 @@ resource "aws_apigatewayv2_route" "post_orders" {
                 <span class="pill">JSON export/backup</span>
               </div>
             </div>
+            <div>
+              <h4>Deploy local (MiniStack)</h4>
+              <div class="pill-row" style="justify-content: flex-start">
+                <span class="pill cyan">MiniStack SDK v3</span>
+                <span class="pill cyan">AWS SDK for JS (browser)</span>
+                <span class="pill aws">LocalStack-compatible API</span>
+                <span class="pill">Docker (localhost:4566)</span>
+              </div>
+            </div>
           </div>
-          <p class="tiny muted" style="margin-top: 1.2em">
-            Servidor existe apenas para: (1) signaling WebRTC e (2) o endpoint
-            <code>/api/generate-terraform</code> que orquestra Gemini + MCP.
-          </p>
         </section>
 
         <!-- ============================================================
@@ -1455,7 +1472,7 @@ export class TerraformGenerator implements IaCGenerator {
              SLIDE 19 — FLUXO COMPLETO
              ============================================================ -->
         <section>
-          <span class="eyebrow cyan">Pipeline mental</span>
+          <span class="eyebrow cyan">Pipeline</span>
           <h2>O fluxo end-to-end.</h2>
           <div
             style="
@@ -1513,13 +1530,13 @@ export class TerraformGenerator implements IaCGenerator {
               >
               <span style="color: var(--oaf-aws)">⑧</span>
               <span
-                >Endpoint chama Gemini + Terraform MCP server (Docker) → HCL com
-                schema real</span
+                >Endpoint chama Gemini + Terraform MCP server → HCL com schema
+                real</span
               >
               <span style="color: var(--oaf-aws)">⑨</span>
               <span
                 >Monaco renderiza HCL com 3 abas · botão download · zero
-                servidor armazena</span
+                backend</span
               >
             </div>
           </div>
@@ -1710,7 +1727,7 @@ export class TerraformGenerator implements IaCGenerator {
             <div class="card">
               <h4>📱 Mobile</h4>
               <p>
-                PWA já instala. Falta UX de toque pesada e gesture handling para
+                PWA já instala. Falta UX touch-first e gesture handling para
                 tablets.
               </p>
             </div>
@@ -1739,7 +1756,7 @@ export class TerraformGenerator implements IaCGenerator {
             <div class="card">
               <span class="icon">🐛</span>
               <h4>Issue</h4>
-              <p>Reporta o bug ou sugere a feature que falta no seu fluxo.</p>
+              <p>Reportar bugs ou sugerir melhorias que faltam no seu fluxo.</p>
             </div>
             <div class="card">
               <span class="icon">🔀</span>
