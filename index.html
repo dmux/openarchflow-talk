@@ -13,22 +13,28 @@
     <!-- Reveal.js core + tema base (sobrescrito abaixo) -->
     <link
       rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reset.css"
+      href="https://cdn.jsdelivr.net/npm/reveal.js@5.2.1/dist/reset.css"
     />
     <link
       rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css"
+      href="https://cdn.jsdelivr.net/npm/reveal.js@5.2.1/dist/reveal.css"
     />
     <link
       rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/black.css"
+      href="https://cdn.jsdelivr.net/npm/reveal.js@5.2.1/dist/theme/black.css"
       id="theme"
     />
 
     <!-- Highlight.js para blocos de código -->
     <link
       rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/monokai.css"
+      href="https://cdn.jsdelivr.net/npm/reveal.js@5.2.1/plugin/highlight/monokai.css"
+    />
+
+    <!-- reveal-pointer CSS (necessário para o cursor-dot aparecer) -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/reveal.js-pointer@0.1.4/dist/pointer.css"
     />
 
     <!-- Fontes distintas: JetBrains Mono (mono/tech) + Space Grotesk evitada -->
@@ -1683,10 +1689,12 @@ export class TerraformGenerator implements IaCGenerator {
     </div>
 
     <!-- Reveal.js scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/highlight.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/notes/notes.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/zoom/zoom.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.2.1/dist/reveal.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.2.1/plugin/highlight/highlight.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.2.1/plugin/notes/notes.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.2.1/plugin/zoom/zoom.js"></script>
+    <!-- reveal-pointer: ponteiro laser virtual (tecla Q) -->
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js-pointer@0.1.4/dist/pointer.js"></script>
 
     <script>
       Reveal.initialize({
@@ -1703,7 +1711,7 @@ export class TerraformGenerator implements IaCGenerator {
         margin: 0.04,
         minScale: 0.1,
         maxScale: 2.0,
-        plugins: [RevealHighlight, RevealNotes, RevealZoom],
+        plugins: [RevealHighlight, RevealNotes, RevealZoom, RevealPointer],
       });
     </script>
   </body>
