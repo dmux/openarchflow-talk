@@ -814,7 +814,7 @@
               <p>
                 Todos os diagramas vivem em
                 <code>localStorage</code>/<code>IndexedDB</code>. Sem cadastro,
-                sem telemetria, sem backend que armazena nada. Você é dono dos
+                sem telemetria, sem backend de armazenamento. Você é dono dos
                 seus desenhos.
               </p>
             </div>
@@ -838,8 +838,8 @@
               <h4>🏗️ IaC pluggable</h4>
               <p>
                 Interface <code>IaCGenerator</code> abstrata. Hoje gera
-                Terraform; amanhã CDK, Pulumi ou CloudFormation — sem tocar a
-                UI.
+                Terraform; amanhã CDK, Pulumi ou CloudFormation — sem modificar
+                a UI.
               </p>
             </div>
           </div>
@@ -857,7 +857,7 @@
             <span class="gradient-text">funcionando.</span>
           </h1>
           <p style="margin-top: 1.2em; font-size: 0.9em" class="muted mono">
-            // 12 minutos · 6 funcionalidades · 1 arquitetura real
+            // 12 minutos · 7 funcionalidades · 1 arquitetura real
           </p>
           <div class="link-block">
             Demo: <span class="url">localhost:3000</span> · Cenário:
@@ -1236,7 +1236,7 @@ resource "aws_apigatewayv2_route" "post_orders" {
             <div>
               <h4>O que isso significa</h4>
               <p style="font-size: 0.8em">
-                Você desenha com seu cliente em tempo real, compartilhando um
+                Você desenha com ses pares em tempo real, compartilhando um
                 link, e
                 <em>nem o servidor de signaling consegue ler o conteúdo</em> do
                 diagrama.
@@ -1373,7 +1373,7 @@ resource "aws_apigatewayv2_route" "post_orders" {
              ============================================================ -->
         <section>
           <span class="eyebrow">Stack</span>
-          <h2>Próximo a <em>nada</em> de backend.</h2>
+          <h2>Backend? <em>Quase nenhum.</em></h2>
           <div class="two-col" style="margin-top: 0.8em">
             <div>
               <h4>Frontend</h4>
@@ -1412,6 +1412,7 @@ resource "aws_apigatewayv2_route" "post_orders" {
                 <span class="pill">localStorage</span>
                 <span class="pill">IndexedDB</span>
                 <span class="pill">JSON export/backup</span>
+                <span class="pill">Google Drive</span>
               </div>
             </div>
             <div>
@@ -1495,13 +1496,13 @@ export class TerraformGenerator implements IaCGenerator {
             >
               <span style="color: var(--oaf-aws)">①</span>
               <span
-                >Usuário digita prompt →
-                <code>"API serverless com Lambda + DynamoDB"</code></span
+                >Cliente escolhe <em>Cloud AI</em> ou <em>Local AI</em> (toggle
+                no toolbar)</span
               >
               <span style="color: var(--oaf-aws)">②</span>
               <span
-                >Cliente escolhe <em>Cloud AI</em> ou <em>Local AI</em> (toggle
-                no toolbar)</span
+                >Usuário digita prompt →
+                <code>"API serverless com Lambda + DynamoDB"</code></span
               >
               <span style="color: var(--oaf-aws)">③</span>
               <span
